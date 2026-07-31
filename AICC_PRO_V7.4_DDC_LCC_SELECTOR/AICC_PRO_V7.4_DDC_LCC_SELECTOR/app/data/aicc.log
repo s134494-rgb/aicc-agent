@@ -1,0 +1,4 @@
+INFO:httpx:HTTP Request: GET http://testserver/api/records/api-book "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: PATCH http://testserver/api/records/api-book "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: DELETE http://testserver/api/records/api-book "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://testserver/api/health "HTTP/1.1 200 OK"

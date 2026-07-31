@@ -1,0 +1,11 @@
+services:
+  aicc:
+    build: .
+    ports: ["8000:8000"]
+    volumes:
+      - aicc_data:/app/app/data
+      - aicc_uploads:/app/app/uploads
+    restart: unless-stopped
+volumes:
+  aicc_data:
+  aicc_uploads:

@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AICC | مركز الفهرسة والتصنيف بالذكاء الاصطناعي</title>
+  <meta name="description" content="AICC منصة مهنية ثنائية اللغة للفهرسة والتصنيف وإدارة المعرفة المكتبية.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=aicc-v6">
+</head>
+<body>
+
+<div class="bg-orbs" aria-hidden="true">
+  <span class="orb orb-1"></span>
+  <span class="orb orb-2"></span>
+  <span class="orb orb-3"></span>
+</div>
+
+<main class="container">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div>
+          <span class="badge">AICC <strong>v6.0</strong> · Professional Cataloging Agent</span>
+          <h1>مركز الفهرسة والتصنيف بالذكاء الاصطناعي</h1>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button id="themeToggle" class="icon-btn" type="button" title="تبديل الوضع الليلي/النهاري" aria-label="تبديل المظهر">🌙</button>
+        <div id="status" class="status">جارٍ فحص النظام...</div>
+      </div>
+    </div>
+    <p class="hero-desc">وكيل ذكي للفهرسة والتصنيف وإدارة المعرفة المكتبية: يحلل الأدلة، يتحقق من ISBN، يقترح DDC/LCC، ينشئ MARC 21، ثم يعيد القرار النهائي للمفهرس.</p>
+
+    <div class="hero-stats" id="heroStats">
+      <div class="stat-pill"><span class="stat-num" id="statTotal">—</span><span>سجل مفهرس</span></div>
+      <div class="stat-pill"><span class="stat-num" id="statLangs">—</span><span>لغة مرصودة</span></div>
+      <div class="stat-pill"><span class="stat-num" id="statTopDdc">—</span><span>أكثر تصنيف تكرارًا</span></div>
+    </div>
+  </header>
+
+  <section class="card" id="dashboardCard">
+    <div class="card-head">
+      <h2>📊 لوحة الإحصائيات الحية</h2>
+      <p class="hint">تتحدث تلقائيًا من قاعدة البيانات المحلية بعد كل عملية فهرسة.</p>
+    </div>
+    <div class="dashboard-grid">
+      <div class="chart-box">
+        <h3>توزيع اللغات</h3>
+        <div id="langChart" class="bars"></div>
+      </div>
+      <div class="chart-box">
+        <h3>أكثر 5 تصنيفات DDC</h3>
+        <div id="ddcChart" class="bars"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>📚 إدخال صفحات الكتاب</h2>
+      <p class="hint">اختر رفع الصور الموجودة أو استخدم التصوير الموجّه بالكاميرا.</p>
+    </div>
+
+    <form id="uploadForm" novalidate>
+      <div class="classification-choice" role="radiogroup" aria-labelledby="classificationChoiceTitle">
+        <div class="classification-choice-head">
+          <div>
+            <h3 id="classificationChoiceTitle">اختر نظام التصنيف قبل التحليل</h3>
+            <p class="hint">سيبني الوكيل رقم الطلب وملصق كعب الكتاب وسجل MARC وفق النظام الذي تختاره.</p>
+          </div>
+          <span id="classificationChoiceBadge" class="count-badge">المحدد: ديوي DDC</span>
+        </div>
+        <div class="classification-buttons">
+          <button id="chooseDdcBtn" class="classification-option active" type="button"
+                  role="radio" aria-checked="true" data-system="ddc">
+            <span class="classification-icon">🔢</span>
+            <strong>تصنيف ديوي العشري</strong>
+            <small>DDC — مناسب للمكتبات العامة والمدرسية</small>
+          </button>
+          <button id="chooseLccBtn" class="classification-option" type="button"
+                  role="radio" aria-checked="false" data-system="lcc">
+            <span class="classification-icon">🏛️</span>
+            <strong>تصنيف مكتبة الكونجرس</strong>
+            <small>LCC — مناسب للمكتبات الأكاديمية والبحثية</small>
+          </button>
+        </div>
+        <input id="classificationSystem" name="classification_system" type="hidden" value="ddc">
+      </div>
+
+      <div class="input-methods" role="tablist" aria-label="طريقة إدخال الصور">
+        <button id="uploadModeBtn" class="method-card active" type="button" role="tab" aria-selected="true">
+          <span>📤</span><strong>رفع ملفات موجودة</strong><small>اختر الصور من الجهاز</small>
+        </button>
+        <button id="cameraModeBtn" class="method-card" type="button" role="tab" aria-selected="false">
+          <span>📷</span><strong>تصوير الكتاب بالكاميرا</strong><small>إرشاد صفحةً صفحة</small>
+        </button>
+      </div>
+
+      <div id="uploadModePanel">
+        <label class="dropzone" for="files">
+          <span class="dropzone-icon">🖼️</span>
+          <strong>اضغط أو اسحب الصور هنا</strong>
+          <span>PNG أو JPG أو JPEG أو WEBP — حتى 20 صورة</span>
+        </label>
+        <input id="files" name="files" type="file" accept="image/*" multiple hidden>
+      </div>
+
+      <div id="cameraModePanel" class="camera-wizard hidden">
+        <div class="camera-progress">
+          <div class="camera-progress-head">
+            <strong id="cameraStepCounter">الخطوة 1 من 8</strong>
+            <span id="cameraCapturedCount">تم التقاط 0 صور</span>
+          </div>
+          <div class="camera-track"><span id="cameraProgressFill"></span></div>
+        </div>
+        <div class="camera-instruction">
+          <span id="cameraStepIcon" class="camera-step-icon">📕</span>
+          <div>
+            <h3 id="cameraStepTitle">صوّر الغلاف الأمامي</h3>
+            <p id="cameraStepHelp">ضع الكتاب كاملًا داخل الإطار وتجنب انعكاس الإضاءة.</p>
+            <span id="cameraStepRequired" class="required-badge">مطلوب</span>
+          </div>
+        </div>
+        <div class="camera-stage">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <canvas id="cameraCanvas" class="hidden"></canvas>
+          <img id="cameraSnapshot" class="hidden" alt="معاينة الصورة الملتقطة">
+          <div class="camera-frame" aria-hidden="true"><span></span></div>
+          <div id="cameraEmptyState" class="camera-empty">
+            <span>📷</span><strong>الكاميرا غير مشغلة</strong>
+            <small>اضغط تشغيل الكاميرا للبدء</small>
+          </div>
+        </div>
+        <div id="cameraError" class="message error hidden"></div>
+        <div class="camera-actions">
+          <button id="startCameraBtn" type="button" class="primary-btn">تشغيل الكاميرا</button>
+          <button id="captureBtn" type="button" class="capture-btn hidden" aria-label="التقاط الصورة"><span></span></button>
+          <button id="acceptCaptureBtn" type="button" class="primary-btn hidden">استخدام الصورة والانتقال</button>
+          <button id="retakeBtn" type="button" class="secondary hidden">إعادة الالتقاط</button>
+          <button id="skipStepBtn" type="button" class="secondary hidden">تخطي هذه الصفحة</button>
+          <button id="switchCameraBtn" type="button" class="secondary hidden">تبديل الكاميرا</button>
+          <button id="finishCameraBtn" type="button" class="primary-btn hidden">إنهاء التصوير واستخدام الصور</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <span id="count" class="count-badge">0 صورة</span>
+        <button id="clearBtn" class="secondary" type="button">مسح الصور</button>
+      </div>
+
+      <div id="previews" class="previews"></div>
+
+      <button id="analyzeBtn" type="submit" class="primary-btn">✨ إنشاء مسودة التحليل</button>
+    </form>
+
+    <div id="progress" class="progress hidden">
+      <div class="spinner"></div>
+      <div>
+        <strong>جارٍ تحليل الصور عبر الوكلاء الذكيين...</strong>
+        <p>قد تستغرق العملية عدة دقائق حسب جهازك.</p>
+      </div>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+  </section>
+
+  <section id="duplicateBanner" class="banner-warning hidden"></section>
+
+  <section id="result" class="card hidden">
+    <div class="card-head">
+      <h2>📖 نتيجة الفهرسة الوصفية</h2>
+      <div class="export-actions">
+        <button id="printBtn" type="button" class="chip-btn">🖨️ طباعة البطاقة</button>
+        <button id="downloadJsonBtn" type="button" class="chip-btn">⬇️ JSON</button>
+        <button id="downloadMarcBtn" type="button" class="chip-btn">⬇️ MARCXML</button>
+      </div>
+    </div>
+    <div id="sourceVerification" class="source-verification hidden" role="status"></div>
+    <div class="grid">
+      <label>العنوان<div class="scored"><input id="title"><span id="score-title" class="score-badge">0%</span></div></label>
+      <label>العنوان الفرعي<div class="scored"><input id="subtitle"><span id="score-subtitle" class="score-badge">0%</span></div></label>
+      <label>المؤلف<div class="scored"><input id="author"><span id="score-author" class="score-badge">0%</span></div></label>
+      <label>نوع المسؤولية<select id="authorType"><option value="personal">مؤلف شخصي</option><option value="corporate">هيئة/مؤسسة</option></select></label>
+      <label>بيان المسؤولية<input id="responsibility"></label>
+      <label>المترجم<div class="scored"><input id="translator"><span id="score-translator" class="score-badge">0%</span></div></label>
+      <label>المحرر/المراجع<div class="scored"><input id="editor"><span id="score-editor" class="score-badge">0%</span></div></label>
+      <label>ISBN<div class="scored"><input id="isbn"><span id="score-isbn" class="score-badge">0%</span></div></label>
+      <label>ISSN<input id="issn"></label>
+      <label>الناشر<div class="scored"><input id="publisher"><span id="score-publisher" class="score-badge">0%</span></div></label>
+      <label>مكان النشر<div class="scored"><input id="publicationPlace"><span id="score-publication_place" class="score-badge">0%</span></div></label>
+      <label>سنة النشر<div class="scored"><input id="year"><span id="score-publication_year" class="score-badge">0%</span></div></label>
+      <label>تاريخ حقوق النشر<input id="copyrightDate"></label>
+      <label>الطبعة<div class="scored"><input id="edition"><span id="score-edition" class="score-badge">0%</span></div></label>
+      <label>اللغة<div class="scored"><input id="language"><span id="score-language" class="score-badge">0%</span></div></label>
+      <label>اللغة الأصلية<input id="originalLanguage"></label>
+      <label>عدد الصفحات<div class="scored"><input id="pagesCount"><span id="score-pages" class="score-badge">0%</span></div></label>
+      <label>الإيضاحات<input id="illustrations"></label>
+      <label>الأبعاد<div class="scored"><input id="dimensions"><span id="score-dimensions" class="score-badge">0%</span></div></label>
+      <label>السلسلة<div class="scored"><input id="series"><span id="score-series" class="score-badge">0%</span></div></label>
+      <label>رقم السلسلة<input id="seriesNumber"></label>
+      <label>الجمهور المستهدف<input id="targetAudience"></label>
+      <label>نوع المصدر<input id="resourceType"></label>
+      <label>نوع المحتوى<input id="contentType"></label>
+      <label>نوع الوسيط<input id="mediaType"></label>
+      <label>نوع الحامل<input id="carrierType"></label>
+    </div>
+    <div class="grid notes-grid">
+      <label>ملاحظة المراجع<textarea id="bibliographyNote" rows="3"></textarea></label>
+      <label>ملاحظة الكشاف<textarea id="indexNote" rows="3"></textarea></label>
+      <label>ملاحظات عامة<textarea id="generalNotes" rows="3"></textarea></label>
+      <label>مرشحو ISBN المكتشفون<textarea id="isbnCandidates" rows="3" readonly></textarea></label>
+    </div>
+  </section>
+
+  <section id="agentsSection" class="card hidden">
+    <div class="card-head"><h2>🤖 مراقبة الوكلاء الذكيين</h2></div>
+    <div id="agents"></div>
+  </section>
+
+  <section id="subjectSection" class="card hidden">
+    <div class="card-head"><h2>🧠 التحليل الموضوعي المبدئي</h2></div>
+    <label>الكلمات المفتاحية<input id="keywords"></label>
+    <label>مسودة الملخص<textarea id="summary" rows="7"></textarea></label>
+    <p class="hint">هذا التحليل محلي إحصائي ويحتاج مراجعة أمين المكتبة.</p>
+  </section>
+
+  <section id="catalogSection" class="card hidden">
+    <div class="card-head">
+      <h2>🏷️ الفهرسة والتصنيف</h2>
+      <span id="selectedClassificationSystem" class="count-badge">تصنيف ديوي DDC</span>
+    </div>
+    <div class="grid">
+      <label>DDC<input id="ddc"></label>
+      <label>LCC<input id="lcc"></label>
+      <label>Cutter<input id="cutter"></label>
+      <label>رقم الطلب<input id="callNumber"></label>
+      <label>درجة الثقة<input id="catalogConfidence"></label>
+      <label>سبب الاقتراح<input id="catalogReason"></label>
+    </div>
+    <label>رؤوس الموضوعات<textarea id="subjects" rows="5"></textarea></label>
+    <p class="hint">التصنيف اقتراح محلي مبدئي، ويجب اعتماده من أمين المكتبة.</p>
+
+    <div id="qrBox" class="qr-box hidden">
+      <img id="qrImage" alt="رمز QR لبطاقة الرف">
+      <div>
+        <strong>ملصق رف بصيغة QR</strong>
+        <p class="hint">يحتوي رقم الطلب وISBN والعنوان — جاهز للطباعة ولصقه على الكتاب.</p>
+      </div>
+    </div>
+
+    <div id="spineLabelBox" class="spine-label-box">
+      <div class="spine-label-heading">
+        <div>
+          <h3>🏷️ ملصق كعب الكتاب</h3>
+          <p class="hint">يُنشأ تلقائيًا من بيانات التصنيف، ويمكن طباعته بعد التحليل أو بعد حفظ التعديلات.</p>
+        </div>
+        <div class="spine-label-controls">
+          <label>رقم النسخة
+            <input id="spineCopyNumber" type="number" min="1" value="1">
+          </label>
+          <label>مقاس الملصق
+            <select id="spineLabelSize">
+              <option value="30x40">30 × 40 مم</option>
+              <option value="25x38">25 × 38 مم</option>
+              <option value="40x50">40 × 50 مم</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="spine-label-layout">
+        <div id="spineLabelPreview" class="spine-label-preview" aria-label="معاينة ملصق كعب الكتاب">
+          <span id="spineClassNumber">—</span>
+          <span id="spineCutter">—</span>
+          <span id="spineYear">—</span>
+          <span id="spineCopy">ن1</span>
+        </div>
+        <div class="spine-label-details">
+          <p><strong>العنوان:</strong> <span id="spineBookTitle">—</span></p>
+          <p><strong>المؤلف:</strong> <span id="spineBookAuthor">—</span></p>
+          <p><strong>رقم الطلب الكامل:</strong> <span id="spineFullCallNumber">—</span></p>
+          <button id="printSpineLabelBtn" type="button" class="primary-btn">🖨️ طباعة ملصق كعب الكتاب</button>
+          <p id="spineLabelWarning" class="spine-label-warning hidden"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="professionalSection" class="card hidden">
+    <div class="card-head">
+      <div>
+        <h2>🧑‍💼 تقرير وكيل الفهرسة المهنية</h2>
+        <p class="hint">قرارات RDA والمدخل الرئيسي والتصنيف ونواقص السجل مع الأدلة.</p>
+      </div>
+      <span id="professionalStatus" class="count-badge">قيد المراجعة</span>
+    </div>
+    <div class="grid">
+      <label>المعيار المطبق<input id="catalogStandard" readonly></label>
+      <label>المدخل الرئيسي<input id="mainAccessPoint" readonly></label>
+      <label>نوع المدخل<input id="mainAccessType" readonly></label>
+      <label>قرار الوكيل<input id="professionalDecision" readonly></label>
+    </div>
+    <label>قائمة التحقق والنواقص<textarea id="catalogChecklist" rows="7" readonly></textarea></label>
+    <label>عناصر RDA المستخرجة<textarea id="rdaElements" rows="10" readonly></textarea></label>
+    <label>بدائل التصنيف المبررة<textarea id="classificationAlternatives" rows="5" readonly></textarea></label>
+  </section>
+
+  <section id="marcSection" class="card hidden">
+    <div class="card-head"><h2>🗂️ MARC21</h2></div>
+    <label>سجل MARC بصيغة JSON<textarea id="marcJson" rows="12"></textarea></label>
+    <label>MARCXML<textarea id="marcXml" rows="12"></textarea></label>
+  </section>
+
+  <section id="reviewSection" class="card hidden">
+    <div class="card-head"><h2>✅ المراجعة والاعتماد البشري</h2></div>
+    <div id="qualityBox" class="message"></div>
+    <p class="hint">لن يُحفظ السجل في الفهرس قبل اعتمادك الصريح. راجع الحقول والتصنيف وسجل MARC أعلاه.</p>
+    <div class="review-actions">
+      <button id="saveDraftBtn" type="button" class="secondary">حفظ التعديلات وإعادة بناء MARC</button>
+      <button id="approveBtn" type="button" class="primary-btn">اعتماد السجل وحفظه</button>
+    </div>
+  </section>
+
+  <section id="pagesSection" class="card hidden">
+    <div class="card-head"><h2>📄 النص المستخرج من كل صورة</h2></div>
+    <div id="pages"></div>
+  </section>
+
+  <section class="card" id="knowledgeSection">
+    <div class="card-head">
+      <div>
+        <h2>🧠 قاعدة معرفة الوكيل RAG</h2>
+        <p class="hint">ارفع سياسات المكتبة، خدماتها، خرائط الرفوف، أدلة الفهرسة والأسئلة الشائعة ليجيب الوكيل منها فقط.</p>
+      </div>
+      <span id="knowledgeStatus" class="count-badge">جارٍ تحميل الوثائق...</span>
+    </div>
+    <form id="knowledgeForm" class="knowledge-form">
+      <label>عنوان الوثيقة<input id="knowledgeTitle" name="title" placeholder="مثال: سياسة الإعارة في المكتبة"></label>
+      <label>التصنيف<select id="knowledgeCategory" name="category">
+        <option>سياسات المكتبة</option><option>خدمات المكتبة</option>
+        <option>الفهرسة والتصنيف</option><option>خريطة الرفوف</option>
+        <option>الأسئلة الشائعة</option><option>دليل الموظفين</option>
+      </select></label>
+      <label>اللغة<select id="knowledgeLanguage" name="language"><option>العربية</option><option>الإنجليزية</option><option>مختلطة</option></select></label>
+      <label>الوثيقة<input id="knowledgeFile" name="file" type="file" accept=".txt,.md,.html,.csv,.json,.pdf,.docx" required></label>
+      <button id="knowledgeUploadBtn" class="primary-btn" type="submit">إضافة الوثيقة إلى RAG</button>
+    </form>
+    <div id="knowledgeMessage" class="message hidden"></div>
+    <div id="knowledgeDocuments" class="knowledge-list"></div>
+    <div class="knowledge-test">
+      <input id="knowledgeTestQuery" placeholder="اختبر الاسترجاع: ما مدة الإعارة؟">
+      <button id="knowledgeTestBtn" type="button" class="secondary">اختبار RAG</button>
+    </div>
+    <div id="knowledgeTestResults" class="rag-results"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>🗄️ السجلات المحفوظة</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>الرقم</th><th>العنوان</th><th>المؤلف</th>
+            <th>ISBN</th><th>اللغة</th><th>التاريخ</th><th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="savedRecordsBody">
+        {% for book in books %}
+          <tr>
+            <td>{{ book.id }}</td>
+            <td>{{ book.title or "—" }}</td>
+            <td>{{ book.author or "—" }}</td>
+            <td>{{ book.isbn or "—" }}</td>
+            <td>{{ book.language or "—" }}</td>
+            <td>{{ book.created_at }}</td>
+            <td class="record-actions">
+              <button type="button" class="record-edit-btn" data-record-id="{{ book.id }}">✏️ تعديل</button>
+              <button type="button" class="record-delete-btn" data-record-id="{{ book.id }}">🗑️ حذف</button>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7">لا توجد سجلات بعد.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <dialog id="recordEditDialog" class="record-dialog">
+    <form id="recordEditForm" method="dialog">
+      <div class="dialog-head">
+        <h2>✏️ تعديل السجل المحفوظ</h2>
+        <button id="recordEditClose" type="button" class="icon-btn" aria-label="إغلاق">✕</button>
+      </div>
+      <input id="editRecordId" type="hidden">
+      <div class="grid">
+        <label>العنوان<input id="editTitle" required></label>
+        <label>العنوان الفرعي<input id="editSubtitle"></label>
+        <label>المؤلف<input id="editAuthor"></label>
+        <label>نوع المسؤولية<select id="editAuthorType"><option value="personal">شخصي</option><option value="corporate">مؤسسي</option></select></label>
+        <label>ISBN<input id="editIsbn"></label>
+        <label>الناشر<input id="editPublisher"></label>
+        <label>مكان النشر<input id="editPublicationPlace"></label>
+        <label>سنة النشر<input id="editPublicationYear"></label>
+        <label>الطبعة<input id="editEdition"></label>
+        <label>اللغة<input id="editLanguage"></label>
+        <label>DDC<input id="editDdc"></label>
+        <label>LCC<input id="editLcc"></label>
+        <label>Cutter<input id="editCutter"></label>
+        <label>رقم الطلب<input id="editCallNumber"></label>
+      </div>
+      <label>رؤوس الموضوعات<textarea id="editSubjects" rows="3"></textarea></label>
+      <label>الكلمات المفتاحية<input id="editKeywords"></label>
+      <label>الملخص<textarea id="editSummary" rows="5"></textarea></label>
+      <div id="recordEditMessage" class="message hidden"></div>
+      <div class="dialog-actions">
+        <button id="recordEditCancel" type="button" class="secondary">إلغاء</button>
+        <button id="recordEditSave" type="submit" class="primary-btn">حفظ التعديلات</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="footer">
+    <p>AICC — القرارات المهنية النهائية تبقى تحت إشراف المفهرس.</p>
+  </footer>
+</main>
+
+<button id="chatFab" class="chat-fab" type="button" aria-label="افتح أمين مكتبة AICC">
+  <span class="chat-fab-icon">💬</span>
+  <span class="chat-fab-pulse"></span>
+</button>
+
+<div id="chatPanel" class="chat-panel hidden">
+  <div class="chat-header">
+    <div class="chat-title">
+      <span class="chat-avatar">✦</span>
+      <div>
+        <strong>أمين مكتبة AICC</strong>
+        <small>وكيل RAG محدود بالمكتبات والموقع</small>
+      </div>
+    </div>
+    <button id="chatClose" class="icon-btn" type="button" aria-label="إغلاق المحادثة">✕</button>
+  </div>
+  <div id="chatMessages" class="chat-messages"></div>
+  <div class="chat-suggestions" id="chatSuggestions">
+    <button type="button" class="suggestion-chip" data-msg="حلل بيانات هذا الكتاب">حلل السجل</button>
+    <button type="button" class="suggestion-chip" data-msg="اعرض السجلات الناقصة بدون ISBN">السجلات الناقصة</button>
+    <button type="button" class="suggestion-chip" data-msg="ابحث عن الكتب العربية ورتبها بالأحدث">بحث وفرز</button>
+  </div>
+  <form id="chatForm" class="chat-input-row">
+    <input id="chatInput" type="text" placeholder="اكتب سؤالك هنا..." autocomplete="off">
+    <button type="submit" class="chat-send">➤</button>
+  </form>
+</div>
+
+<script src="/static/app.js?v=aicc-v6"></script>
+</body>
+</html>
