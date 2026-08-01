@@ -1,0 +1,2 @@
+PLATFORM_BROWSER_SYNC_URL=https://smlib.kesug.com/api/aicc_browser_import.php
+# Keep PLATFORM_SYNC_KEY exactly as currently configured.
