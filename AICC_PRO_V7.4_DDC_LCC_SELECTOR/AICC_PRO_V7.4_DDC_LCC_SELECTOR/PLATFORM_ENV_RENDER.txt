@@ -1,0 +1,2 @@
+PLATFORM_SYNC_URL=https://smlib.kesug.com/api/aicc_platform_sync.php
+PLATFORM_SYNC_KEY=348f0684aa7b5f8985fb72395c51d43dd19bf4e02c09e5cbb0828ef548ced24e
