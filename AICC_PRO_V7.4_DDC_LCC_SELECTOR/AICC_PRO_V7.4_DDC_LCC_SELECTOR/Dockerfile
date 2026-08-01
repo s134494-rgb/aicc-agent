@@ -9,5 +9,6 @@ RUN python patch_browser_bridge.py
 RUN python patch_platform_status.py
 RUN python patch_saved_records_export.py
 RUN python patch_auto_platform_sync_v5.py
+RUN python patch_manual_sync_button_v6.py
 EXPOSE 8000
 CMD ["sh","-c","uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
