@@ -45,9 +45,10 @@ def _schema():
 
 def research_book(book):
     """Search the live web and return only an evidence-backed exact identity."""
-    base = os.getenv("LLM_BASE_URL", "").rstrip("/")
-    key = os.getenv("LLM_API_KEY", "")
-    model = os.getenv("WEB_RESEARCH_MODEL", "") or os.getenv("LLM_MODEL", "")
+    base = (os.getenv("LLM_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
+    key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+    model = (os.getenv("WEB_RESEARCH_MODEL") or os.getenv("LLM_MODEL") or
+             os.getenv("OPENAI_MODEL") or "gpt-4.1-mini")
     if not (base and key and model):
         return {}
     observed = {key: book.get(key, "") for key in (
@@ -78,7 +79,7 @@ def research_book(book):
         data=json.dumps(body, ensure_ascii=False).encode(),
         headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=180) as response:
+        with urllib.request.urlopen(request, timeout=75) as response:
             payload = json.loads(response.read())
         data = json.loads(_response_text(payload))
     except Exception:

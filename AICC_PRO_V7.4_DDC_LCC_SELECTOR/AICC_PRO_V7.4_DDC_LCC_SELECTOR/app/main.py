@@ -158,13 +158,13 @@ def process_page(index, filename, path):
         raw_text,lang,ocr_metrics=extract_text(path)
     except FileNotFoundError:
         raw_text=""; lang="غير محددة"; ocr_metrics={"attempts":0,"agreement":0}
-        warning.append("محرك OCR غير مثبت؛ ثبّت Tesseract مع ara وeng ثم أعد التحليل.")
+        warning.append("تعذر OCR المحلي؛ سيحاول GPT Vision استخراج البيانات من الصورة.")
     if not raw_text:
-        warning.append("لم يستطع OCR استخراج نص؛ أعد التقاط هذه الصفحة بصورة أوضح.")
+        warning.append("لم يستطع OCR استخراج نص كافٍ؛ سيحاول GPT Vision قراءة الصورة مباشرة.")
     clean_text=raw_text or "[لم يتم استخراج نص واضح]"
     page={"index":index,"filename":filename,"page_type":detect_page_type(clean_text,filename),
       "language":lang,"raw_text":raw_text,"text":clean_text,
-      "quality_score":metrics["score"] if raw_text else min(metrics["score"],40),
+      "quality_score":metrics["score"],
       "quality_metrics":metrics,"ocr_metrics":ocr_metrics,"warnings":warning}
     elapsed=int((time.perf_counter()-started)*1000)
     runs=[

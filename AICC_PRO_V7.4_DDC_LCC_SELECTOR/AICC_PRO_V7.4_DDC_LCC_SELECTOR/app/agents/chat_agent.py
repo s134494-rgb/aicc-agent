@@ -15,7 +15,7 @@ STOP={"اريد","أريد","ابحث","لي","عن","كتاب","كتب","ما",
  "شيء","موضوع","اظهر","أظهر","ابغى","بغيت","حول","يخص"}
 
 def ai_config():
-    base=os.getenv("LLM_BASE_URL","").rstrip("/"); key=os.getenv("LLM_API_KEY",""); model=os.getenv("LLM_MODEL","")
+    base=(os.getenv("LLM_BASE_URL") or "https://api.openai.com/v1").rstrip("/"); key=os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY",""); model=os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4.1-mini"
     configured=bool(base and key and model and not key.lower().startswith(("ضع_","your_","changeme")))
     return {"configured":configured,"base_url":base,"model":model,
       "provider":"OpenAI" if "api.openai.com" in base else "OpenAI-compatible"}
@@ -33,7 +33,7 @@ def _response_text(payload):
 
 def _optional_llm(message,history,context,records,chunks):
     config=ai_config()
-    base=config["base_url"]; key=os.getenv("LLM_API_KEY",""); model=config["model"]
+    base=config["base_url"]; key=os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY",""); model=config["model"]
     if not config["configured"]:return "","not_configured"
     evidence=json.dumps({"active_record":context,"catalog_records":records[:8],
       "rag_chunks":[{"source":x["citation"],"text":x["content"]} for x in chunks[:5]]},ensure_ascii=False)
@@ -49,7 +49,7 @@ def _optional_llm(message,history,context,records,chunks):
     req=urllib.request.Request(base+"/responses",data=body,
       headers={"Authorization":"Bearer "+key,"Content-Type":"application/json"})
     try:
-        with urllib.request.urlopen(req,timeout=120) as res:
+        with urllib.request.urlopen(req,timeout=60) as res:
             text=_response_text(json.loads(res.read()))
             return (text,"") if text else ("","empty_response")
     except Exception as exc:

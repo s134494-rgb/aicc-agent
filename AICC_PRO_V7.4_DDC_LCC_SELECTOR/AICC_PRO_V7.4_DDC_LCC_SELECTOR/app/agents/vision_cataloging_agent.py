@@ -28,9 +28,10 @@ FIELDS = (
 
 
 def vision_config():
-    base = os.getenv("LLM_BASE_URL", "").rstrip("/")
-    key = os.getenv("LLM_API_KEY", "")
-    model = os.getenv("VISION_MODEL", "") or os.getenv("LLM_MODEL", "")
+    base = (os.getenv("LLM_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
+    key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+    model = (os.getenv("VISION_MODEL") or os.getenv("LLM_MODEL") or
+             os.getenv("OPENAI_MODEL") or "gpt-4.1-mini")
     configured = bool(
         base and key and model
         and not key.lower().startswith(("ضع_", "your_", "changeme"))
@@ -80,9 +81,9 @@ def _schema():
 def _image_data_url(path):
     with Image.open(path) as source:
         image = ImageOps.exif_transpose(source).convert("RGB")
-        image.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
+        image.thumbnail((1400, 1400), Image.Resampling.LANCZOS)
         buffer = io.BytesIO()
-        image.save(buffer, "JPEG", quality=86, optimize=True)
+        image.save(buffer, "JPEG", quality=82, optimize=True)
     encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
     return f"data:image/jpeg;base64,{encoded}"
 
@@ -140,7 +141,7 @@ def analyze_images(items):
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=180) as response:
+        with urllib.request.urlopen(request, timeout=90) as response:
             raw = json.loads(response.read())
         text = _response_text(raw)
         data = json.loads(text)
